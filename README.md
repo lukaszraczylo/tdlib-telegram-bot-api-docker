@@ -21,6 +21,14 @@ docker pull docker.pkg.github.com/lukaszraczylo/tdlib-telegram-bot-api-docker/te
 docker run -p 8081:8081 -e TELEGRAM_API_ID=yourApiID -e TELEGRAM_API_HASH=yourApiHash -t docker.pkg.github.com/lukaszraczylo/tdlib-telegram-bot-api-docker/telegram-api-server
 ```
 
+*Thing to remember:* Entrypoint is set to the server binary, therefore you can still modify parameters on the go, as shown below
+
+#### Setting the log output and verbosity
+![Set the log output and verbosity](img/screen-001.png?raw=true)
+
+#### Printing out the help
+![Print out the help](img/screen-002.png?raw=true)
+
 ### Kubernetes configuration version
 
 TBC;
