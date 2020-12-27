@@ -1,0 +1,35 @@
+name: Build Telegram API server
+on:
+  workflow_dispatch
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    name: Clone telegram api server repo
+    steps:
+      - name: Checkout API repo
+        uses: actions/checkout@v2
+        with:
+          repository: 'tdlib/telegram-bot-api'
+          path: '/home/runner/work/tdlib-telegram-bot-api-docker/tdlib-telegram-bot-api-docker/tdlib-telegram-bot-api'
+      - name: Checkout Dockerfile
+        uses: actions/checkout@v2
+        with:
+          repository: 'lukaszraczylo/tdlib-telegram-bot-api-docker'
+          path: '/home/runner/work/tdlib-telegram-bot-api-docker/tdlib-telegram-bot-api-docker/docker'
+      - name: Apply Dockerfile
+        run: |
+          cp /home/runner/work/tdlib-telegram-bot-api-docker/tdlib-telegram-bot-api-docker/docker/Dockerfile /home/runner/work/tdlib-telegram-bot-api-docker/tdlib-telegram-bot-api-docker/tdlib-telegram-bot-api/Dockerfile
+      - name: Get release sha and run number
+        id: get_sha
+        run: |
+          echo "GITHUB_SHA=$(echo ${GITHUB_SHA::8})" >> $GITHUB_ENV
+          echo "GITHUB_RUN_ID=$(echo ${GITHUB_RUN_NUMBER})" >> $GITHUB_ENV
+      - name: Build Docker image
+        run: |
+          cd /home/runner/work/tdlib-telegram-bot-api-docker/tdlib-telegram-bot-api-docker/tdlib-telegram-bot-api
+          export SET_DOCKER_REGISTRY="docker.pkg.github.com"
+          export BASE_IMG_NAME="$SET_DOCKER_REGISTRY/lukaszraczylo/tdlib-telegram-bot-api-docker/telegram-api-server"
+          docker login $SET_DOCKER_REGISTRY -u "${{ github.actor }}" -p "${{ secrets.GITHUB_TOKEN }}"
+          docker build -t $BASE_IMG_NAME:${{ env.GITHUB_SHA }} -t $BASE_IMG_NAME:1.0.${{ env.GITHUB_RUN_ID }} -t $BASE_IMG_NAME:latest .
+          docker push "$BASE_IMG_NAME"
+          docker push "$BASE_IMG_NAME:latest"
