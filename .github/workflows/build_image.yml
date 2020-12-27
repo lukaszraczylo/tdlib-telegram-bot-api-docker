@@ -1,7 +1,8 @@
 name: Build Telegram API server
 on:
+  workflow_dispatch:
   schedule:
-  - cron: "0 2 */7 * *"
+    - cron: "0 2 */7 * *"
 jobs:
   build:
     runs-on: ubuntu-20.04
@@ -25,12 +26,16 @@ jobs:
         run: |
           echo "GITHUB_SHA=$(echo ${GITHUB_SHA::8})" >> $GITHUB_ENV
           echo "GITHUB_RUN_ID=$(echo ${GITHUB_RUN_NUMBER})" >> $GITHUB_ENV
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
       - name: Build Docker image
         run: |
           cd /home/runner/work/tdlib-telegram-bot-api-docker/tdlib-telegram-bot-api-docker/tdlib-telegram-bot-api
           export SET_DOCKER_REGISTRY="docker.pkg.github.com"
           export BASE_IMG_NAME="$SET_DOCKER_REGISTRY/lukaszraczylo/tdlib-telegram-bot-api-docker/telegram-api-server"
           docker login $SET_DOCKER_REGISTRY -u "${{ github.actor }}" -p "${{ secrets.GITHUB_TOKEN }}"
-          docker build -t $BASE_IMG_NAME:${{ env.GITHUB_SHA }} -t $BASE_IMG_NAME:1.0.${{ env.GITHUB_RUN_ID }} -t $BASE_IMG_NAME:latest .
+          docker buildx build --platform linux/arm64,linux/amd64 -t $BASE_IMG_NAME:${{ env.GITHUB_SHA }} -t $BASE_IMG_NAME:1.0.${{ env.GITHUB_RUN_ID }} -t $BASE_IMG_NAME:latest .
           docker push "$BASE_IMG_NAME"
           docker push "$BASE_IMG_NAME:latest"
