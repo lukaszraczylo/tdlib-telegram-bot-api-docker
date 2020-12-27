@@ -5,6 +5,11 @@ Produce working, minimal Docker image for the Telegram Bot API server together w
 to use pipeline generating builds on the changes within the main repository managed by
 Telegram team.
 
+## Build schedule
+Build will be triggered automatically once a week to produce the latest version of the Telegram API Server.
+I would set it for the daily release but every build takes ~25 minutes and generates additional costs on my side.
+Images are versioned in format `1.0.x` where `x` is a build number.
+
 ## How to use the image
 
 ### Github authentication
