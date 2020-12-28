@@ -36,11 +36,11 @@ You need to authenticate with github ([see this thread](https://github.community
 docker login -u $GITHUB_USERNAME -p $GITHUB_TOKEN docker.pkg.github.com
 ```
 
-### Docker configuration version
+### Docker configuration
 
 ```
-docker pull docker.pkg.github.com/lukaszraczylo/tdlib-telegram-bot-api-docker/telegram-api-server:latest
-docker run -p 8081:8081 -e TELEGRAM_API_ID=yourApiID -e TELEGRAM_API_HASH=yourApiHash -t docker.pkg.github.com/lukaszraczylo/tdlib-telegram-bot-api-docker/telegram-api-server
+docker pull ghcr.io/lukaszraczylo/tdlib-telegram-bot-api-docker/telegram-api-server:latest
+docker run -p 8081:8081 -e TELEGRAM_API_ID=yourApiID -e TELEGRAM_API_HASH=yourApiHash -t ghcr.io/lukaszraczylo/tdlib-telegram-bot-api-docker/telegram-api-server
 ```
 
 *Thing to remember:* Entrypoint is set to the server binary, therefore you can still modify parameters on the go, as shown below
@@ -51,6 +51,6 @@ docker run -p 8081:8081 -e TELEGRAM_API_ID=yourApiID -e TELEGRAM_API_HASH=yourAp
 #### Printing out the help
 ![Print out the help](img/screen-002.png?raw=true)
 
-### Kubernetes configuration version
+### Kubernetes configuration
 
 TBC;
