@@ -13,11 +13,13 @@ This project does not modify any part of the [tdlib/telegram-bot-api](https://gi
 ## Issues
 
 As I do not modify any part of the server code I am not responsible for the way it works. For that purpose you should open an issue on the [telegram bot api server](https://github.com/tdlib/telegram-bot-api/issues) issue tracker.
+
 **TL;DR:** My responsibility ends when container and binary starts.
 
 ## Build schedule
 Build will be triggered automatically once a week to produce the latest version of the Telegram API Server.
-I would set it for the daily release but every build takes ~25 minutes and generates additional costs on my side.
+I would set it for the daily release but every build takes ~2.5 hours and generates additional costs on my side.
+
 Images are versioned in format `1.0.x` where `x` is a build number.
 
 ## How to use the image
