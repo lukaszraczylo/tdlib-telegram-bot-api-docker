@@ -21,6 +21,7 @@ Build will be triggered automatically once a week to produce the latest version 
 I would set it for the daily release but every build takes ~2.5 hours and generates additional costs on my side.
 
 Images are versioned in format `1.0.x` where `x` is a build number.
+There's additional tag added: `api-5.1` where `5.1` is the version of Telegram API supported by the image.
 
 ## How to use the image
 
