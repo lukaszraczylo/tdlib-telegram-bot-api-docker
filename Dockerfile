@@ -9,4 +9,5 @@ RUN cd /srv/build && cmake --build . --target install
 FROM alpine:latest
 RUN apk add --no-cache zlib-dev openssl-dev libstdc++
 COPY --from=buildBase /srv/build/telegram-bot-api /srv/telegram-bot-api
-ENTRYPOINT ["/srv/telegram-bot-api"]
+VOLUME /data
+ENTRYPOINT ["/srv/telegram-bot-api", "--dir=/data"]
