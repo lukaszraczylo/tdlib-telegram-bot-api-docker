@@ -52,4 +52,75 @@ docker run -p 8081:8081 -e TELEGRAM_API_ID=yourApiID -e TELEGRAM_API_HASH=yourAp
 
 ### Kubernetes configuration
 
-TBC;
+Example deployment within kubernetes cluster
+
+```yaml
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: telegram-api
+# spec:
+#   accessModes:
+#     - ReadWriteMany
+#   storageClassName: longhorn
+#   resources:
+#     requests:
+#       storage: 5Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telegram-api
+  labels:
+    app: telegram-api
+spec:
+  selector:
+    matchLabels:
+      app: telegram-api
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: telegram-api
+    spec:
+      containers:
+        - name: bot-api
+          image: ghcr.io/lukaszraczylo/tdlib-telegram-bot-api-docker/telegram-api-server:latest
+          imagePullPolicy: Always
+          args: [ "--local", "--max-webhook-connections", "1000" ]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 500m
+              memory: 500Mi
+          ports:
+            - containerPort: 8081
+              protocol: TCP
+              name: api
+          env:
+            - name: TELEGRAM_API_ID
+              value: "xxx"
+            - name: TELEGRAM_API_HASH
+              value: "yyy"
+          # volumeMounts:
+          # - name: shared-storage
+          #   mountPath: /data
+      # volumes:
+      # - name: shared-storage
+      #   persistentVolumeClaim:
+      #     claimName: telegram-api
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-role.kubernetes.io/control-plane
+                operator: DoesNotExist
+              - key: node-role.kubernetes.io/storage
+                operator: DoesNotExist
+              - key: node-role.kubernetes.io/highmem
+                operator: Exists
+```
