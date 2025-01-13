@@ -1,0 +1,34 @@
+name: Keep Repository Active
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every Monday
+    - cron: '0 0 * * 1'
+  
+  # Allow manual trigger for testing
+  workflow_dispatch:
+
+jobs:
+  update-dummy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Modify dummy file
+        run: |
+          if grep -q " $" DUMMY.txt; then
+            # If file ends with space, remove it
+            sed -i 's/ $//' DUMMY.txt
+          else
+            # If file doesn't end with space, add one
+            echo -n " " >> DUMMY.txt
+          fi
+      
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add DUMMY.txt
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update DUMMY.txt to keep repository active" && git push)
