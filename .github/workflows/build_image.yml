@@ -14,12 +14,12 @@ jobs:
     name: Build ${{ matrix.platform }} image
     steps:
       - name: Checkout API repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: 'tdlib/telegram-bot-api'
           path: '/home/runner/work/tdlib-telegram-bot-api-docker/tdlib-telegram-bot-api-docker/tdlib-telegram-bot-api'
       - name: Checkout Dockerfile
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: 'lukaszraczylo/tdlib-telegram-bot-api-docker'
           path: '/home/runner/work/tdlib-telegram-bot-api-docker/tdlib-telegram-bot-api-docker/docker'
@@ -32,12 +32,13 @@ jobs:
           echo "GITHUB_SHA=$(echo ${GITHUB_SHA::8})" >> $GITHUB_ENV
           echo "GITHUB_RUN_ID=$(echo ${GITHUB_RUN_NUMBER})" >> $GITHUB_ENV
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        id: buildx
+        uses: docker/setup-buildx-action@v3
       - name: Login to GHCR
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -59,10 +60,10 @@ jobs:
           TAGS="$TAGS,${DOCKER_IMAGE}:${{ env.GITHUB_SHA }}-${PLATFORM_TAG}"
 
           TG_API_VERSION=$(grep "project(TelegramBotApi" /home/runner/work/tdlib-telegram-bot-api-docker/tdlib-telegram-bot-api-docker/tdlib-telegram-bot-api/CMakeLists.txt | awk '{print $3}')
-          echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=version::${VERSION}
-          echo ::set-output name=tg_api_version::${TG_API_VERSION}
-          echo ::set-output name=image::${DOCKER_IMAGE}
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "tg_api_version=${TG_API_VERSION}" >> $GITHUB_OUTPUT
+          echo "image=${DOCKER_IMAGE}" >> $GITHUB_OUTPUT
           # lowercase the branch name
           BRANCH=$(echo ${GITHUB_REF##*/} | tr '[A-Z]' '[a-z]')
           LABELS="org.opencontainers.image.revision=$GITHUB_SHA"
@@ -70,15 +71,15 @@ jobs:
           LABELS="$LABELS,org.opencontainers.image.version=$VERSION"
           LABELS="$LABELS,com.github.repo.branch=$BRANCH"
           LABELS="$LABELS,com.github.repo.dockerfile=Dockerfile"
-          echo ::set-output name=labels::${LABELS}
+          echo "labels=${LABELS}" >> $GITHUB_OUTPUT
           BUILD_ARGS="BRANCH=$BRANCH"
-          echo ::set-output name=args::${BUILD_ARGS}
+          echo "args=${BUILD_ARGS}" >> $GITHUB_OUTPUT
       - name: Tag names
         run: echo ${{ steps.prep.outputs.tags }}
       - name: Build and push
         id: docker_build
         timeout-minutes: 350
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v6
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: /home/runner/work/tdlib-telegram-bot-api-docker/tdlib-telegram-bot-api-docker/tdlib-telegram-bot-api
@@ -102,9 +103,9 @@ jobs:
     name: Create multi-arch manifest
     steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
       - name: Login to GHCR
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
