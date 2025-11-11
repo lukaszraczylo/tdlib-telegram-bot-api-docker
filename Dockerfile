@@ -1,9 +1,15 @@
 FROM alpine:latest as buildBase
-RUN apk add --no-cache alpine-sdk linux-headers git zlib-dev openssl-dev gperf php cmake
+RUN apk add --no-cache alpine-sdk linux-headers git zlib-dev openssl-dev gperf php cmake ccache
 ADD . /srv
 WORKDIR /srv
-RUN git submodule update --init --recursive && mkdir -p build && cd build && cmake -DCMAKE_INSTALL_PREFIX:PATH=../tdlib -DCMAKE_BUILD_TYPE=Release ..
-RUN cd /srv/build && cmake --build . --target install
+RUN --mount=type=cache,target=/root/.cache/git \
+    git submodule update --init --recursive
+RUN mkdir -p build && cd build && \
+    cmake -DCMAKE_INSTALL_PREFIX:PATH=../tdlib -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ..
+RUN --mount=type=cache,target=/root/.ccache \
+    cd /srv/build && \
+    export CCACHE_DIR=/root/.ccache && \
+    cmake --build . --target install -j$(nproc)
 # RUN upx --best /srv/build/telegram-bot-api
 
 FROM alpine:latest
